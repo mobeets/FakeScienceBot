@@ -28,10 +28,10 @@ def get_message(handle):
 def main():
     handle = twitter_handle()
     while True:
-        time.sleep(TWEET_EVERY_N_SECONDS)
         message = get_message(handle)
         print message
         submit_tweet(message, handle)
+        time.sleep(TWEET_EVERY_N_SECONDS)
 
 if __name__ == '__main__':
     main()
