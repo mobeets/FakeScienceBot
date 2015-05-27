@@ -7,6 +7,7 @@ from pattern.en.wordlist import BASIC
 from pattern.en import wordnet, conjugate, pluralize, singularize, quantify
 
 from crawl import fetch_arxiv_ids, save_raw_abstracts
+nltk.data.path.append('./nltk_data/')
 
 DATADIR = 'data'
 
