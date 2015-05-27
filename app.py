@@ -21,8 +21,8 @@ def submit_tweet(message, handle=None):
     handle.update_status(status=message)
 
 def get_message(handle):
-    message = justone(pred=lambda x: len(x) <= TWEET_LENGTH)
-    assert len(message) <= TWEET_LENGTH
+    message = '"' + justone(pred=lambda x: len(x) <= TWEET_LENGTH-2) + '"'
+    assert len(message) <= TWEET_LENGTH-2
     return message
 
 def main():
