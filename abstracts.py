@@ -1,4 +1,5 @@
 import os
+import argparse
 from random import random, choice, shuffle
 
 import nltk
@@ -85,27 +86,38 @@ def convert(title, thresh_count=0):
 
     return ''.join(new_words), count >= thresh_count
 
-def justone(atom=None, datadir=DATADIR, pred=None):
+def getsubfield(field=None, subfield=None):
+    if subfield is None:
+        if field is None:
+            field = choice(FIELDS)
+        subfield = choice([x for x in ALL_FIELDS if field in x])
+    return subfield
+
+def justone(atom=None, pred=None):
     if pred is None:
         pred = lambda x: True
     if atom is None:
-        field = choice(FIELDS)
-        subfield = choice([x for x in ALL_FIELDS if field in x])
-        print field, subfield
-        atom = load(load_new=True, key=subfield, years='new')
+        atom = load(load_new=True, key=getsubfield(), years='new')
     success = False
+    i = 0
     while not success:
-        phrase, success = convert(clean(choice(atom.entries)['title']), 2)
-        success = success and pred(phrase)
-    return phrase
+        if i > 100:
+            return justone(pred=pred)
+        i += 1
+        content = clean(choice(atom.entries)['title'])
+        phrase, success = convert(content, 2)
+        success = success and pred(phrase) and '$' not in phrase
+    return phrase.title()
 
-def main():
-    field = choice(FIELDS)
-    subfield = choice([x for x in ALL_FIELDS if field in x])
-    print field, subfield
-    atom = load_new(load_new=True, key=subfield, years='new')
-    for i in xrange(10):
+def main(n=1, field=None, subfield=None):
+    atom = load(load_new=True, key=getsubfield(field, subfield), years='new')
+    for i in xrange(n):
         print justone(atom=atom)
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--field', type=str, default=None, help='arxiv field')
+    parser.add_argument('--subfield', type=str, default=None, help='arxiv subfield')
+    parser.add_argument('-n', '--number', type=int, default=10, help='# of titles to generate')
+    args = parser.parse_args()
+    main(n=args.number, field=args.field, subfield=args.subfield)

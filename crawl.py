@@ -53,7 +53,7 @@ def fetch_arxiv_ids(field, years, num=0):
             total_entries = int(
                 re.search("(?<=total of )\d+(?= entries)", page.text_content()).group()
             )
-            print total_entries
+            # print total_entries
             skip += MAX_SHOW
 
             # parse ids
@@ -85,7 +85,7 @@ def get_raw_abstracts(idset):
         values = {'max_results': 1000,
                   'id_list': ','.join(chunk)}
         data = urllib.urlencode(values)
-        print 'retrieving %d' % i
+        # print 'retrieving %d' % i
         req = urllib2.Request(ARXIV_API_BASE_URL, data)
         res = urllib2.urlopen(req)
         ress.append(res)
@@ -98,7 +98,7 @@ def save_raw_abstracts(idset, save_dir):
         values = {'max_results': 1000,
                   'id_list': ','.join(chunk)}
         data = urllib.urlencode(values)
-        print 'retrieving %d' % i
+        # print 'retrieving %d' % i
         req = urllib2.Request(ARXIV_API_BASE_URL, data)
         res = urllib2.urlopen(req)
         with open(os.path.join(save_dir, '%d.abs' % i), 'w') as f:
