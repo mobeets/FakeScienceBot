@@ -1,3 +1,15 @@
+Finds a recently published paper from arxiv.org and converts at least two words to something simpler.
+
+## Usage
+
+Print random paper titles by field or subfield:
+
+`python abstracts.py --subfield q-bio.NC`
+
+`python abstracts.py --field q-bio`
+
+## Best of
+
 <blockquote class="twitter-tweet" lang="en"><p lang="en" dir="ltr">&quot;Theory Of Temporal Fluctuations In Some Quantum Pudding&quot;</p>&mdash; Dr. StrangeBot (@Dr_StrangeBot_) <a href="https://twitter.com/Dr_StrangeBot_/status/603691450191196160">May 27, 2015</a></blockquote>
 <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
 
