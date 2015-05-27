@@ -6,10 +6,37 @@ import feedparser
 from pattern.en.wordlist import BASIC
 from pattern.en import wordnet, conjugate, pluralize, singularize, quantify
 
-from crawl import fetch_arxiv_ids, save_raw_abstracts
+from crawl import fetch_arxiv_ids, save_raw_abstracts, get_raw_abstracts
 nltk.data.path.append('./nltk_data/')
 
 DATADIR = 'data'
+FIELDS = ['cond-mat', 'physics', 'math', 'nlin', 'cs', 'q-bio', 'stat']
+ALL_FIELDS = ["astro-ph", "astro-ph.EP", "astro-ph.HE", "astro-ph.CO", "astro-ph.IM", 
+    "astro-ph.SR", "astro-ph.GA", "cond-mat", "cond-mat.dis-nn", "cond-mat.soft", 
+    "cond-mat.mtrl-sci", "cond-mat.stat-mech", "cond-mat.quant-gas", "cond-mat.supr-con", 
+    "cond-mat.str-el", "cond-mat.mes-hall", "cond-mat.other", "gr-qc", "hep-ex", 
+    "hep-lat", "hep-ph", "hep-th", "math-ph", "nlin", "nlin.CG", "nlin.CD", 
+    "nlin.SI", "nlin.AO", "nlin.PS", "nucl-ex", "nucl-th", "physics", "physics.pop-ph", 
+    "physics.space-ph", "physics.data-an", "physics.optics", "physics.soc-ph", 
+    "physics.atm-clus", "physics.flu-dyn", "physics.gen-ph", "physics.bio-ph", 
+    "physics.hist-ph", "physics.plasm-ph", "physics.atom-ph", "physics.med-ph", 
+    "physics.geo-ph", "physics.acc-ph", "physics.class-ph", "physics.ins-det", 
+    "physics.comp-ph", "physics.ed-ph", "physics.chem-ph", "physics.ao-ph", 
+    "quant-ph", "math", "math.IT", "math.NT", "math.AP", "math.ST", "math.PR", 
+    "math.OA", "math.CV", "math.AG", "math.RT", "math.MG", "math.GR", "math.MP", 
+    "math.HO", "math.SG", "math.CO", "math.GN", "math.DG", "math.GT", "math.NA", 
+    "math.LO", "math.DS", "math.OC", "math.QA", "math.GM", "math.AC", "math.AT", 
+    "math.KT", "math.CA", "math.SP", "math.FA", "math.CT", "math.RA", "cs", 
+    "cs.ET", "cs.SC", "cs.MA", "cs.GL", "cs.IT", "cs.IR", "cs.CC", "cs.FL", 
+    "cs.OS", "cs.SD", "cs.PL", "cs.SI", "cs.CV", "cs.LG", "cs.NE", "cs.DB", 
+    "cs.OH", "cs.NA", "cs.SE", "cs.SY", "cs.DC", "cs.MS", "cs.AR", "cs.PF", 
+    "cs.DL", "cs.CE", "cs.CR", "cs.AI", "cs.GT", "cs.DM", "cs.HC", "cs.MM", 
+    "cs.CL", "cs.CY", "cs.DS", "cs.NI", "cs.LO", "cs.RO", "cs.CG", "cs.GR", 
+    "q-bio", "q-bio.BM", "q-bio.GN", "q-bio.TO", "q-bio.CB", "q-bio.SC", 
+    "q-bio.PE", "q-bio.NC", "q-bio.MN", "q-bio.QM", "q-bio.OT", "q-fin", 
+    "q-fin.TR", "q-fin.CP", "q-fin.PM", "q-fin.PR", "q-fin.GN", "q-fin.RM", 
+    "q-fin.EC", "q-fin.MF", "q-fin.ST", "stat", "stat.TH", "stat.ME", 
+    "stat.OT", "stat.ML", "stat.CO", "stat.AP"]
 
 def generate(key='q-bio.NC', years=range(2010, 2016), outdir=DATADIR):
     """ src: https://github.com/centrality/arxiv/blob/master/arxiv/crawl.py """
@@ -17,9 +44,14 @@ def generate(key='q-bio.NC', years=range(2010, 2016), outdir=DATADIR):
     os.mkdir(outdir)
     save_raw_abstracts(ids, outdir)
 
-def load(indir):
-    infile = os.path.join(DATADIR, '0.txt')
-    return feedparser.parse(infile)
+def load(indir=DATADIR, load_new=False, key='q-bio.NC', years='new'):
+    if load_new:
+        ids = fetch_arxiv_ids(key, years)
+        xs = get_raw_abstracts(ids)
+        return feedparser.parse(''.join(xs[0]))
+    else:
+        infile = os.path.join(indir, '0.txt')
+        return feedparser.parse(infile)
 
 def clean(entry):
     return ' '.join([x.strip() for x in entry.replace('\n', ' ').split()])
@@ -57,15 +89,21 @@ def justone(atom=None, datadir=DATADIR, pred=None):
     if pred is None:
         pred = lambda x: True
     if atom is None:
-        atom = load(datadir)
+        field = choice(FIELDS)
+        subfield = choice([x for x in ALL_FIELDS if field in x])
+        print field, subfield
+        atom = load(load_new=True, key=subfield, years='new')
     success = False
     while not success:
         phrase, success = convert(clean(choice(atom.entries)['title']), 2)
         success = success and pred(phrase)
     return phrase
 
-def main(datadir=DATADIR):
-    atom = load(datadir)
+def main():
+    field = choice(FIELDS)
+    subfield = choice([x for x in ALL_FIELDS if field in x])
+    print field, subfield
+    atom = load_new(load_new=True, key=subfield, years='new')
     for i in xrange(10):
         print justone(atom=atom)
 

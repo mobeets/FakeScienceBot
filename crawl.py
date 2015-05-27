@@ -33,18 +33,20 @@ SPIRES_REF_BASE_URL = "http://www-spires.slac.stanford.edu/spires/find/hep/"\
                       "wwwrefs?rawcmd=eprint+"
 
 
-def fetch_arxiv_ids(field, years):
+def fetch_arxiv_ids(field, years, num=0):
     idset = set()
-    if type(years) is int:
+    if type(years) is int or type(years) is str:
         years = [years]
     for year in years:
-        year %= 100
-        if year < 10:
-            year = "0" + str(year)
-        else:
-            year = str(year)
+        if type(year) is int:
+            year %= 100
+            if year < 10:
+                year = "0" + str(year)
+            else:
+                year = str(year)
         skip = 0
         total_entries = sys.maxint
+        total = 0
         while skip < total_entries:
             # retrieve pages
             page = fetch_arxiv_list(field, year, skip)
@@ -57,8 +59,11 @@ def fetch_arxiv_ids(field, years):
             # parse ids
             links = page.xpath("//a[@title='Abstract']")
             idlist = [a.get('href')[5:] for a in links]
-            for id in idlist:
+            for i, id in enumerate(idlist):
                 idset.add(id)
+                total += 1
+                if num > 0 and total == num:
+                    return idset
     return idset
 
 def fetch_arxiv_list(field, year, skip):
@@ -71,6 +76,20 @@ def fetch_arxiv_list(field, year, skip):
 def chunks(lst, n):
     return [lst[i:i+n] for i in range(0, len(lst), n)]
 
+
+def get_raw_abstracts(idset):
+    ids = list(idset)
+    i = 0
+    ress = []
+    for chunk in chunks(ids, 1000):
+        values = {'max_results': 1000,
+                  'id_list': ','.join(chunk)}
+        data = urllib.urlencode(values)
+        print 'retrieving %d' % i
+        req = urllib2.Request(ARXIV_API_BASE_URL, data)
+        res = urllib2.urlopen(req)
+        ress.append(res)
+    return ress
 
 def save_raw_abstracts(idset, save_dir):
     ids = list(idset)
@@ -85,7 +104,6 @@ def save_raw_abstracts(idset, save_dir):
         with open(os.path.join(save_dir, '%d.abs' % i), 'w') as f:
             shutil.copyfileobj(res, f)
         i += 1
-
 
 def save_raw_refs(arxiv_ids, save_dir):
     """
