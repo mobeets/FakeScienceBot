@@ -1,6 +1,7 @@
 import os
 import time
 from twython import Twython
+from abstracts import justone
 
 CONSUMER_KEY = os.environ['TWITTER_CONSUMER_KEY']
 CONSUMER_SECRET = os.environ['TWITTER_CONSUMER_SECRET']
@@ -9,7 +10,7 @@ OAUTH_TOKEN_SECRET = os.environ['TWITTER_OAUTH_TOKEN_SECRET']
 TWEET_LENGTH = 140
 TWEET_URL_LENGTH = 21
 
-TWEET_EVERY_N_SECONDS = 60*1 # e.g. 60*10 = ten minutes between each tweet
+TWEET_EVERY_N_SECONDS = 60*5 # e.g. 60*10 = ten minutes between each tweet
 
 def twitter_handle():
     return Twython(CONSUMER_KEY, CONSUMER_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
@@ -23,7 +24,7 @@ def get_message(handle):
     """
     Your code goes here!
     """
-    message = 'I TWEET THIS.'
+    message = justone(pred=lambda x: len(x) <= TWEET_LENGTH)
     assert len(message) <= TWEET_LENGTH
     return message
 

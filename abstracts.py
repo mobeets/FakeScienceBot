@@ -52,12 +52,21 @@ def convert(title, thresh_count=0):
 
     return ''.join(new_words), count >= thresh_count
 
+def justone(atom=None, datadir=DATADIR, pred=None):
+    if pred is None:
+        pred = lambda x: True
+    if atom is None:
+        atom = load(datadir)
+    success = False
+    while not success:
+        phrase, success = convert(clean(choice(atom.entries)['title']), 2)
+        success = success and pred(phrase)
+    return phrase
+
 def main(datadir=DATADIR):
     atom = load(datadir)
     for i in xrange(10):
-        phrase, success = convert(clean(choice(atom.entries)['title']), 2)
-        if success:
-            print phrase
+        print justone(atom=atom)
 
 if __name__ == '__main__':
     main()
